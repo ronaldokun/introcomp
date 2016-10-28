@@ -22,41 +22,9 @@ def buildMenu(names, values, calories):
                           calories[i]))
     return menu
 
-def greedy(items, maxCost, keyFunction):
-    """Assumes items a list, maxCost >= 0,
-         keyFunction maps elements of Items to numbers"""
-    itemsCopy = sorted(items, key = keyFunction,
-                       reverse = True)
-    result = []
-    totalValue, totalCost = 0.0, 0.0
-    for i in range(len(itemsCopy)):
-        if (totalCost+itemsCopy[i].getCost()) <= maxCost:
-            result.append(itemsCopy[i])
-            totalCost += itemsCopy[i].getCost()
-            totalValue += itemsCopy[i].getValue()
-    return (result, totalValue)
-
-def testGreedy(items, constraint, keyFunction):
-    taken, val = greedy(items, constraint, keyFunction)
-    print('Total value of items taken =', val)
-    for item in taken:
-        print('   ', item)
-
-def testGreedys(foods, maxUnits):
-    print('Use greedy by value to allocate', maxUnits,
-          'calories')
-    testGreedy(foods, maxUnits, Food.getValue)
-    print('\nUse greedy by cost to allocate', maxUnits,
-          'calories')
-    testGreedy(foods, maxUnits,
-               lambda x: 1/Food.getCost(x))
-    print('\nUse greedy by density to allocate', maxUnits,
-          'calories')
-    testGreedy(foods, maxUnits, Food.density)
-
 def maxVal(toConsider, avail):
     """Assumes toConsider a list of items, avail a weight
-       Returns a tuple of the total value of a solution to the
+       Returns a tuple of the total weight of a solution to the
          0/1 knapsack problem and the items of that solution"""
     if toConsider == [] or avail == 0:
         result = (0, ())
@@ -87,14 +55,45 @@ def testMaxVal(foods, maxUnits, printItems = True):
         for item in taken:
             print('   ', item)
 
-names = ['wine', 'beer', 'pizza', 'burger', 'fries',
-         'cola', 'apple', 'donut', 'cake']
-values = [89,90,95,100,90,79,50,10]
-calories = [123,154,258,354,365,150,95,195]
-foods = buildMenu(names, values, calories)
+import random
 
-testGreedys(foods, 750)
-print('')
-testMaxVal(foods, 750)
+def buildLargeMenu(numItems, maxVal, maxCost):
+    items = []
+    for i in range(numItems):
+        items.append(Food(str(i),
+                          random.randint(1, maxVal),
+                          random.randint(1, maxCost)))
+    return items
 
+#for numItems in (5, 10, 15, 20, 25, 30, 35, 40, 45):
+#    print('Try a menu with', numItems, 'items')
+#    items = buildLargeMenu(numItems, 90, 250)
+#    testMaxVal(items, 750, False)
+#    
+    
+
+def fib(n):
+    if n == 0 or n == 1:
+        return 1
+    else:
+        return fib(n - 1) + fib(n - 2)
+
+#for i in range(121):
+#    print('fib(' + str(i) + ') =', fib(i))
+
+
+def fastFib(n, memo = {}):
+    """Assumes n is an int >= 0, memo used only by recursive calls
+       Returns Fibonacci of n"""
+    if n == 0 or n == 1:
+        return 1
+    try:
+        return memo[n]
+    except KeyError:
+        result = fastFib(n-1, memo) + fastFib(n-2, memo)
+        memo[n] = result
+        return result
+
+for i in range(121):
+    print('fib(' + str(i) + ') =', fastFib(i))
 
