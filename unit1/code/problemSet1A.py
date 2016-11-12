@@ -17,7 +17,7 @@ class Cow(object):
     def getWeight(self):
         return self.weight
     def __str__(self):
-        return str(self.name) + ': <' + str(self.weight) + '>'
+        return str(self.name) + ': <' + str(self.weight) + '> tons'
 
 
 def load_cows(filename):
@@ -55,43 +55,42 @@ def buildListofCows(cows):
     return list_cows
     
     
-def maxVal(toConsider, avail):
-    """Assumes toConsider a list of items, avail a weight
+def nextVal(toConsider, avail):
+    """Assumes toConsider an ordered list of items, avail a weight
        Returns a tuple of the total value of a solution to the
-         0/1 knapsack problem and the items of that solution"""
+         0/1 knapsack problem with the constraint that
+         it's obliged to pick the next most heavy item first, i.e, always  
+         explore the left branch of the graph first if it there is space.
+       
+         """
     if toConsider == [] or avail == 0:
         result = (0, ())
     elif toConsider[0].getWeight() > avail:
         #Explore right branch only
-        result = maxVal(toConsider[1:], avail)
+        result = nextVal(toConsider[1:], avail)
     else:
         
-        withVal, withoutVal = 0,0
-        
         nextItem = toConsider[0]
+
         #Explore left branch
-        withVal, withToTake = maxVal(toConsider[1:],
+        withVal, withToTake = nextVal(toConsider[1:],
                                      avail - nextItem.getWeight())
-        withVal += 1
-        #Explore right branch
-        withoutVal, withoutToTake = maxVal(toConsider[1:], avail)
-        #Choose better branch
-        if withVal > withoutVal:
-            result = (withVal, withToTake + (nextItem,))
-        else:
-            result = (withoutVal, withoutToTake)
+        withVal += nextItem.getWeight()
+        
+        result = (withVal, withToTake + (nextItem,))
+        
     return result
 
-def testMaxVal(Cows, maxUnits, returnItems = True):
-    print('Use search tree to allocate', maxUnits,
-          'tons')
+def testNextVal(Cows, maxUnits, returnItems = True):
+    #print('Use search tree to allocate', maxUnits,
+    #     'tons')
     trip = []
-    val, taken = maxVal(Cows, maxUnits)
-    print('Numbers of Cows taken on trip =', val)
+    val, taken = nextVal(Cows, maxUnits)
+    #print('Numbers of Cows taken on trip =', val)
     if returnItems:
         for item in taken:
-            print('   ', item)
-            trip.append(item.getName())
+            #print('   ', item)
+            trip.append(item)
         return trip
     
 # Problem 1
@@ -117,40 +116,113 @@ def greedy_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    trip = []
-    # Create a copy of the original dictionaty
+    # Create an ordered by weight list of the original dictionary
     cash_cows = buildListofCows(cows)
-    
-    #Trace the space left in the spaceship
-    left = limit
-    
+     
+    # this is a list of lists, each inner list is an individual trip
+    voyage = []
+    trip = []
     subtrip = []
-    
-    
-    for i in range(len(cash_cows)):
-                   
-        if cash_cows[i].getWeight() > limit:
-            next                    
-        elif cash_cows[i].getWeight() <= space_left:            
-            subtrip.append(cash_cows[i].getName())
-            space_left = space_left - cash_cows[i].getWeight()
-        else:
+    #Trace the space left in the spaceship
+    space_left = limit   
+   
+    while(len(cash_cows)):
+        #If the cow's weight is above the limit, she can't be transpórted
+        if cash_cows[0].getWeight() > limit:
+           
+            cash_cows.pop(0)
             
-                   
-        
+        elif cash_cows[0].getWeight() <= space_left:
             
-    if len(subtrip) != 0:
-        trip.append(subtrip)
-                
-    return trip            
-            
-            
-            
-            
-            
-        
-    
+            trip.append(cash_cows[0])
+                        
+            space_left -= cash_cows[0].getWeight()
+                        
+            cash_cows.pop(0)
 
+        else:
+            #check if the remaining cows on the list fit the available space
+            subtrip = testMaxVal(cash_cows[1:], space_left)
+            
+            if len(subtrip):
+                trip += subtrip
+                
+            #remove the allocated cows from the original list           
+            for item in trip:
+                if item in cash_cows:                    
+                    cash_cows.remove(item)
+                
+            voyage.append([item.getName() for item in trip])
+            
+            trip, subtrip = [],[]
+            
+            space_left = limit
+    
+    # If the last iteration dind't enter the else block
+    if(len(trip)):
+        voyage.append([item.getName() for item in trip])
+
+            
+        
+    return voyage       
+            
+ 
+def fastMaxVal(toConsider, avail, memo = {}):
+    
+    """Assumes toConsider a list of subjects, 
+       avail a weight
+       memo supplied by recursive calls
+       Returns a tuple of the total value of a solution to the
+       0/1 knapsack problem and the subjects of that solution
+       
+       Notice: the Weight is both the cost and the value metric
+    """
+    if (len(toConsider), avail) in memo:
+        return memo[(len(toConsider), avail)]
+                    
+    elif toConsider == [] or avail == 0:
+        return (0,())
+    
+    elif toConsider[0].getWeight > avail:
+        #Explore right branch only
+        fastMaxVal(toConsider[1:], avail, memo)
+        
+    else:
+        
+        nextItem = toConsider[0]
+
+        withVal, withToTake = fastMaxVal(toConsider[1:],
+                                         avail - nextItem.getWeight(), memo)
+        
+        withVal += nextItem.getWeight()
+        #Explore right branch
+        withoutVal, withoutToTake = fastMaxVal(toConsider[1:],
+                                             avail, memo)
+        
+        #Choose better branch
+        if withVal > withoutVal:
+            return (withVal, withToTake + (nextItem,))
+        
+        else:
+            result = (withoutVal, withoutToTake)
+    
+    memo[(len(toConsider), avail)] = result
+    
+    return result
+        
+
+def testMaxVal(Cows, maxUnits, returnItems = True):
+    #print('Use search tree to allocate', maxUnits,
+    #     'tons')
+    trip = []
+    val, taken = fastMaxVal(Cows, maxUnits)
+    #print('Numbers of Cows taken on trip =', val)
+    if returnItems:
+        for item in taken:
+            #print('   ', item)
+            trip.append(item)
+        return trip        
+        
 
 
 
@@ -175,8 +247,23 @@ def brute_force_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+    
+    #Create ordered list by weight of cows
+    # Create an ordered by weight list of the original dictionary
+    cash_cows = buildListofCows(cows)
+    
+    cow_partitions = get_partitions(cash_cows)
+    
+    trip = []
+    
+    for partitions in cow_partitions:         
+        for partition in partitions:
+            trip.append(testMaxVal(partition,limit))
+        if len(trip) == len(cash_cows):
+            break
+        else:
+            
+    
 
         
 # Problem 3
