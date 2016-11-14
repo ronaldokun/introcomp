@@ -9,7 +9,7 @@ Created on Sat Nov 12 19:23:54 2016
 ###########################
 # 6.00.2x Problem Set 1: Space Cows 
 
-from problemSet1_partition import get_partitions
+from get_partitions_ruskey import get_partitions_ruskey
 import time
 
 #================================
@@ -195,7 +195,25 @@ def testMaxVal(listCows, maxUnits, returnItems = True):
         return trip        
         
 
+def countWeight(listOfCows):
+    
+    weight = 0
+    for cow in listOfCows:
+        weight += cow.getWeight() 
+        
+    return weight
+        
 
+def namesOfPart(partitions):
+   
+    part = []
+
+    for partition in partitions:
+        part.append([cow.getName() for cow in partition])
+        
+    return part
+            
+    
 
 # Problem 2
 def brute_force_cow_transport(cows,limit=10):
@@ -224,15 +242,44 @@ def brute_force_cow_transport(cows,limit=10):
     # Create an ordered by weight list of the original dictionary
     cash_cows = buildListofCows(cows)
     
+    #cow_names = [cow.getName() for cow in cash_cows]
+                 
+    
     cow_partitions = get_partitions_ruskey(cash_cows)
     
     trip = []
-    
+
+       
     for partitions in cow_partitions:         
         for partition in partitions:
-            trip.append(testMaxVal(partition,limit))
-        if len(trip) == len(cash_cows):
-            break
+            
+            if countWeight(partition) > limit:
+                trip = []
+                break
+            
+            else:
+                #print("\nPartition: ", namesOfPart(partitions))
+                #print("\nSubset in analysis: ", 
+                      #[cow.getName() for cow in partition])
+                
+                #partWeight = countWeight(partition)
+                subtrip = fastMaxVal(partition,limit)
+                #print("\nPartitionWeight: ", partWeight) 
+                #print("\nTrip allocated weight: ",subtrip[0])
+                
+                trip.append(subtrip)
+        
+        if len(trip) == len(partitions):
+            #print("\n Partição encontrada: \n")
+                        
+            return namesOfPart(partitions)
+            
+    return None
+                
+                     
+        
+        
+        
     
             
     
@@ -266,7 +313,18 @@ cows = load_cows("ps1_cow_data.txt")
 limit=10
 print(cows)
 
-print(greedy_cow_transport(cows, limit))
-print(brute_force_cow_transport(cows, limit))
+start = time.time()
+greedy_cow_transport(cows, limit)
+end = time.time()
+
+print("Greedy Algorithm Time: ", end - start)
+
+start = time.time()
+
+brute_force_cow_transport(cows, limit)
+
+end = time.time()
+
+print("Brute Force Algorithm Time: ", end - start)
 
 
