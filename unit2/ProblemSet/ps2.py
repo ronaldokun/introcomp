@@ -56,6 +56,31 @@ class Position(object):
         return "(%0.2f, %0.2f)" % (self.x, self.y)
 
 
+class Point(object):
+    """
+    A class point to abstract the positions of the tiles and robots in the
+    rectangle class
+    """
+    
+    def __init__(self,x,y):
+        
+        self.x = x
+        
+        self.y = y
+        
+    def getX(self):
+        return self.x
+        
+    def getY(self):
+        return self.y
+        
+    def changePoint(self,newX, newY):
+        
+        self.x = newX
+        self.y = newY
+        
+    def __str__()
+
 # === Problem 1
 class RectangularRoom(object):
     """
@@ -74,7 +99,14 @@ class RectangularRoom(object):
         width: an integer > 0
         height: an integer > 0
         """
-        raise NotImplementedError
+        
+        self.width = abs(int(width))
+        
+        self.height = abs(int(height))
+        
+        
+        
+        #raise NotImplementedError
     
     def cleanTileAtPosition(self, pos):
         """
