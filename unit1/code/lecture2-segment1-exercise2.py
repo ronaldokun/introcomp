@@ -21,7 +21,7 @@ def powerSet(iterable):
     #make a list from the iterable
     items = list(iterable)
     
-    return chain.from_iterable(combinations(items, k) 
+    return chain.from_iterable(combinations(items, k)\
     for k in range(len(items) + 1))
     
     

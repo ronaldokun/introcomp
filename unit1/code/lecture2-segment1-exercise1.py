@@ -57,7 +57,7 @@ def yieldAllCombos(items):
         yield (bag1,bag2)
                 
                 
-items = ['a1', 'a2', 'a3']
+items = ['a', 'b', 'c', 'd']
             
 foo = yieldAllCombos(items)
 

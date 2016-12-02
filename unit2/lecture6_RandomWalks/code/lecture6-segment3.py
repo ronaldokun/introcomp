@@ -1,4 +1,4 @@
-import random, pylab
+import random, math, pylab
 
 #set line width
 pylab.rcParams['lines.linewidth'] = 4
@@ -125,14 +125,37 @@ class ColdDrunk(Drunk):
         stepChoices = [(0.0,0.9), (0.0,-1.1),
                        (1.0, 0.0), (-1.0, 0.0)]
         return random.choice(stepChoices)
+        
+class EDrunk(Drunk):
+    def takeStep(self):
+        ang = 2 * math.pi * random.random()
+        length = 0.5 + 0.5 * random.random()
+        return (length * math.sin(ang), length * math.cos(ang))
 
+class PhotoDrunk(Drunk):
+    def takeStep(self):
+        stepChoices =\
+                    [(0.0, 0.5),(0.0, -0.5),
+                     (1.5, 0.0),(-1.5, 0.0)]
+        return random.choice(stepChoices)
+
+class DDrunk(Drunk):
+    def takeStep(self):
+        stepChoices =\
+                    [(0.85, 0.85), (-0.85, -0.85),
+                     (-0.56, 0.56), (0.56, -0.56)] 
+        return random.choice(stepChoices)
+        
 def simAll(drunkKinds, walkLengths, numTrials):
     for dClass in drunkKinds:
         drunkTest(walkLengths, numTrials, dClass)
+
         
 #random.seed(0)
-#simAll((UsualDrunk, ColdDrunk),
-#      (1, 10, 100, 1000, 10000), 100)
+#
+bar = (EDrunk,PhotoDrunk,DDrunk)        
+#
+#simAll(bar, (1, 10, 100, 1000, 10000), 100)
 
 
 class styleIterator(object):
@@ -213,7 +236,7 @@ def plotLocs(drunkKinds, numSteps, numTrials):
     pylab.legend(loc = 'upper left')
 
 random.seed(0)
-plotLocs((UsualDrunk, ColdDrunk), 10000, 1000)
+plotLocs(bar, 10000, 1000)
 
 class OddField(Field):
     def __init__(self, numHoles = 1000,
