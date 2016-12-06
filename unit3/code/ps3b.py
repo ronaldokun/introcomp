@@ -5,7 +5,7 @@ import pylab
 
 #from ps3b_precompiled_35 import *
 
-#random.seed(0)
+random.seed(0)
 
 #set line width
 pylab.rcParams['lines.linewidth'] = 4
@@ -235,8 +235,17 @@ class Patient(object):
 #    
     
                  
-                
+def runTimeSteps(patient, timeSteps):
 
+    population = []
+    
+    for i in range(timeSteps):              
+        
+        patient.update()
+        
+        population.append(float(patient.getTotalPop()))
+        
+    return population
 
 
 #
@@ -258,33 +267,42 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
     numTrials: number of simulation runs to execute (an integer)
     """
     
-    #Create a list of viruses
+    #There are numTrials lists, each internal list contain the number of 
+    # virus at each time step
     
-    infection = [SimpleVirus(maxBirthProb, clearProb) for i in range(numViruses)]
+    timeSteps = 300
     
-    #Instantiate one patient infected with numViruses
-    patient = Patient(viruses=infection, maxPop = maxPop)
-    
-    #lists to keep the time steps and number of viruses for time step
-    
-    virusPop = [[]] * numTrials 
+    virusPop = [] 
     
     for i in range(numTrials):
-        #run one time step
-        patient.update()
-                       
-        #Average Pop. = Total Population divided by the number of trials
-        virusPop.append(float(patient.getTotalPop()))
         
-        #At time step i, virus Pop[i] keeps the average population from 0 to i
-        #virusPop[i] = pylab.mean(virusPop) 
-        
+        #Create a list of viruses   
+        infection = [SimpleVirus(maxBirthProb, clearProb) for i in range(numViruses)]
     
-    print(virusPop)  
+        #Instantiate one patient infected with numViruses
+        patient = Patient(viruses=infection, maxPop = maxPop)
+        
+        virusPop.append(runTimeSteps(patient, timeSteps))
+        
+    averagePop = []
+    
+    sumStep = 0.0
+    
+    for i in range(timeSteps):
+        
+        for virus in virusPop:
+            
+            sumStep += virus[i]
+            
+        averagePop.append(float(sumStep/numTrials))
+        
+        sumStep = 0.0
+        
+              
 
     pylab.figure()    
         
-    pylab.plot(virusPop, label = "SimpleVirus Population at time t")
+    pylab.plot(averagePop, label = "SimpleVirus Population at time t")
     
     pylab.xlabel("Time Step")
     
@@ -298,7 +316,7 @@ def simulationWithoutDrug(numViruses, maxPop, maxBirthProb, clearProb,
     
     
     
-simulationWithoutDrug(1, 90, 0.8, 0.1, 1)
+simulationWithoutDrug(100, 1000, 0.1, 0.05, 300)
  
 #Extreme Case: population should rapidly increase
 #simulationWithoutDrug(100, 1000, 0.99, 0.05, 300)
