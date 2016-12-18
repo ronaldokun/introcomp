@@ -5,7 +5,7 @@ import pylab
 
 #from ps3b_precompiled_35 import *
 
-random.seed(0)
+#random.seed(0)
 
 #set line width
 pylab.rcParams['lines.linewidth'] = 4
@@ -215,7 +215,7 @@ class Patient(object):
         if len(newViruses):
             self.viruses.extend(newViruses)
             
-        return self.viruses
+        return self.getTotalPop()
                 
 
 # maxBirthProb, clearProb     
@@ -500,7 +500,9 @@ class TreatedPatient(Patient):
         maxPop: The  maximum virus population for this patient (an integer)
         """
 
-        # TODO
+        Patient.__init__(self, viruses, maxPop)
+        
+        self.drugs = []
 
 
     def addPrescription(self, newDrug):
@@ -514,7 +516,9 @@ class TreatedPatient(Patient):
         postcondition: The list of drugs being administered to a patient is updated
         """
 
-        # TODO
+        if newDrug not in self.drugs:
+            self.drugs.append(newDrug)
+            
 
 
     def getPrescriptions(self):
@@ -525,7 +529,7 @@ class TreatedPatient(Patient):
         patient.
         """
 
-        # TODO
+        return self.drugs
 
 
     def getResistPop(self, drugResist):
@@ -539,8 +543,33 @@ class TreatedPatient(Patient):
         returns: The population of viruses (an integer) with resistances to all
         drugs in the drugResist list.
         """
+        total = 0
 
-        # TODO
+        for virus in self.getViruses():
+            
+                        
+            for drug in drugResist:
+                
+                if drug in virus.getResistances().keys():
+                    if not virus.isResistantTo(drug):
+                        break
+                else: break
+            
+            else:
+                total+= 1
+            
+#            #list of True == 1 or False == 0
+#            testResist = [virus.isResistantTo(drug) for drug in drugResist \
+#             if drug in virus.getResistances().keys()]
+#            
+#            # If all items of the list were True the sum will be equal to 
+#            # len(drugResist)
+#            if sum(testResist) == len(drugResist): #and len(drugResist)!=0:
+#                total += 1
+#            
+        return total
+            
+            
 
 
     def update(self):
@@ -563,10 +592,97 @@ class TreatedPatient(Patient):
         returns: The total virus population at the end of the update (an
         integer)
         """
+        
+        # create a new list to accomodate the new population virus and
+        # not mutate the current population while iterating over it
+        virusesCopy = []
+        
+        for virus in self.getViruses():
+            
+            if not virus.doesClear():
+                
+                virusesCopy.append(virus)
+        
+        #update the viruses list
+        self.viruses = virusesCopy
+        
+        popDensity = self.getTotalPop()/self.getMaxPop()
+        
+        newViruses = []
+        
+        for virus in self.getViruses():
+            
+            try:
+                child = virus.reproduce(popDensity, self.drugs)
+                
+                newViruses.append(child)
+            
+            except:
+                
+                next
+                
+        #check if list is not empty
+        if len(newViruses):
+            self.viruses.extend(newViruses)
+            
+        return self.getTotalPop()
 
-        # TODO
+#Test of Treated Patient
+        
+#virus = ResistantVirus(1.0, 0.0, {}, 0.0)
+#
+#patient = TreatedPatient([virus], 100)
+#
+#for i in range(100):
+#    patient.update()
+#    
+#print(patient.getTotalPop())
+
+#virus1 = ResistantVirus(1.0, 0.0, {"drug1": True}, 0.0)
+#virus2 = ResistantVirus(1.0, 0.0, {"drug1": False, "drug2": True}, 0.0)
+#virus3 = ResistantVirus(1.0, 0.0, {"drug1": True, "drug2": True}, 0.0)
+#patient = TreatedPatient([virus1, virus2, virus3], 100)
+#
+#print(patient.getResistPop(['drug1']))
+#print(patient.getResistPop(['drug2']))
+#print(patient.getResistPop(['drug1','drug2']))
+#print(patient.getResistPop(['drug3']))
+#print(patient.getResistPop(['drug1', 'drug3']))
+#print(patient.getResistPop(['drug1','drug2', 'drug3']))    
 
 
+def runTimeSteps2(patient, timeSteps, drugResist):
+    
+    """
+    
+    patient: An instance of the Patient class
+    
+    timeSteps: Number of iterations (An integer)
+    
+    drugResist; A list containing strings of drug names
+    
+    
+    Call the method patient.update() for timeSteps times    
+    and update the patient total virus population as well
+    as the current population resistant to the drugs 
+    listed in drugResist
+    
+    return a tuple of (Total virus population, number of resistant virus)
+    
+    """   
+    
+
+    population, resistant = [], []
+    
+    for i in range(timeSteps):              
+        
+        patient.update()
+        
+        population.append(patient.getTotalPop())
+        
+        resistant.append(patient.getResistPop(drugResist))
+        
+    return (population,resistant)
 
 #
 # PROBLEM 4
@@ -594,4 +710,95 @@ def simulationWithDrug(numViruses, maxPop, maxBirthProb, clearProb, resistances,
     
     """
 
-    # TODO
+    timeSteps = 150
+    
+    virusPop = []
+    
+    virusPopResist = []
+    
+    
+    for i in range(numTrials):
+        
+        #Create a list of viruses   
+        infection = [ResistantVirus(maxBirthProb, clearProb, resistances, \
+                                    mutProb) for i in range(numViruses)]
+    
+        #Instantiate one patient infected with numViruses
+        patient = TreatedPatient(infection, maxPop = maxPop)
+        
+        #Run timeSteps updates without any drug        
+        #listPop, listResist = runTimeSteps2(patient, timeSteps, ['guttagonol'])
+        
+        listPop, listResist = runTimeSteps2(patient, timeSteps, ['guttagonol'])
+        
+        virusPop.append(listPop)
+        
+        virusPopResist.append(listResist)
+        
+        #add drug
+        patient.addPrescription('guttagonol')
+        
+        #Run additional timeSteps with drug 
+        listPop, listResist = runTimeSteps2(patient, timeSteps, ['guttagonol'])
+        
+        # Extend the last appended list with the additional list now with
+        # the drug added
+        
+        virusPop[-1].extend(listPop)
+        
+        virusPopResist[-1].extend(listResist)
+        
+        
+        
+        
+    avgPop, avgResist = [],[]
+    
+    sumPop, sumResist = 0.0, 0.0
+    
+    for i in range(2 * timeSteps):
+        
+        #iterate both lists
+        for v,r in zip(virusPop, virusPopResist):
+            
+            sumPop += v[i]; sumResist += r[i]
+            
+        avgPop.append(sumPop/numTrials)
+        
+        avgResist.append(sumResist/numTrials)
+        
+        sumPop, sumResist = 0.0, 0.0
+     
+    #print("Plotting: ", avgPop)
+    
+    #print("\nPlotting: ", avgResist)
+    
+    pylab.figure()
+    
+    pylab.plot(avgPop, label = "Total")
+    
+    pylab.plot(avgResist, label = "ResistantVirus")
+   
+    pylab.title("ResistantVirus Simulation")
+    
+    pylab.xlabel("Time Step")
+    
+    pylab.ylabel("# viruses")
+             
+    pylab.legend(loc = "best")   
+    
+    pylab.show()
+        
+        
+#simulationWithDrug(100, 1000, 0.1, 0.05, {'guttagonol':False}, 0.005, 100)       
+        
+#simulationWithDrug(1, 10, 1.0, 0.0, {}, 1.0, 5)    
+   
+#simulationWithDrug(1, 10, 1.0, 0.0, {}, 1.0, 5)
+
+#simulationWithDrug(1, 20, 1.0, 0.0, {"guttagonol": True}, 1.0, 5)
+
+#simulationWithDrug(1, 20, 1.0, 0.0, {"guttagonol": True}, 1.0, 5)
+
+#random.seed(0)
+simulationWithDrug(75, 100, .8, 0.1, {"guttagonol": True}, 0.8, 1)
+
