@@ -7,6 +7,8 @@ Created on Sun Oct 23 20:11:52 2016
 """
 
 # generate all combinations of N items
+
+
 def powerSet(items):
     N = len(items)
     # enumerate the 2**N possible combinations
@@ -17,10 +19,9 @@ def powerSet(items):
             if (i >> j) % 2 == 1:
                 combo.append(items[j])
         yield combo
-    
-        
+
+
 def yieldAllCombos(items):
-    
     """ Generates all combinations of N item into two bags, whereby each 
     item  is in one or zero bags.
 
@@ -37,30 +38,29 @@ def yieldAllCombos(items):
     The idea here is that x >> y it's equal to x//2**y so to emulate
     ternary digits we do x//3**y      
 
-    """    
+    """
     N = len(items)
-    
-    #enumerate all the 3 possibles combinations
+
+    # enumerate all the 3 possibles combinations
     for i in range(3**N):
-        
+
         bag1 = []
         bag2 = []
-        for j in range(N):            
-            # floor divison it's equal to 0, 1 or 2 
-            floor = i //(3**j)
-               
-            if (floor % 3 == 1): 
+        for j in range(N):
+            # floor divison it's equal to 0, 1 or 2
+            floor = i // (3**j)
+
+            if (floor % 3 == 1):
                 bag1.append(items[j])
             elif (floor % 3 == 2):
-                bag2.append(items[j])               
-                        
-        yield (bag1,bag2)
-                
-                
+                bag2.append(items[j])
+
+        yield (bag1, bag2)
+
+
 items = ['a', 'b', 'c', 'd']
-            
+
 foo = yieldAllCombos(items)
 
 for i in foo:
-    print (i)
-                
+    print(i)

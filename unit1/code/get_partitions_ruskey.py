@@ -14,6 +14,7 @@ Created on Sat Nov 12 19:15:42 2016
 # Author: Wan-Teh Chang
 # Date: 2016-11-06
 
+
 def partitions_ruskey(L, m):
     def visit(a):
         partition = [[] for i in range(m)]
@@ -86,6 +87,7 @@ def partitions_ruskey(L, m):
         j += 1
     yield from f(m, n, 0, a)
 
+
 def get_partitions_ruskey(L):
     yield [L[:]]
     for m in range(2, len(L)):
@@ -93,5 +95,5 @@ def get_partitions_ruskey(L):
     if len(L) > 1:
         yield [[e] for e in L]
 
-#for partitions in get_partitions_ruskey(['a','b','c','e']):
+# for partitions in get_partitions_ruskey(['a','b','c','e']):
 #    print(partitions, len(partitions))
