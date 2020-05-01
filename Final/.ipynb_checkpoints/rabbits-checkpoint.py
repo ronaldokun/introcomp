@@ -78,7 +78,7 @@ def foxGrowth():
                 if CURRENTFOXPOP == 10: break
                 
             
-              
+                    
             
                 
     

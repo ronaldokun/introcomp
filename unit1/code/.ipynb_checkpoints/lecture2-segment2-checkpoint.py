@@ -1,3 +1,5 @@
+
+
 class Food(object):
     def __init__(self, n, v, w):
         self.name = n
@@ -73,9 +75,9 @@ def buildLargeMenu(numItems, maxVal, maxCost):
     return items
 
 for numItems in (5, 10, 15, 20, 25, 30, 35, 40, 45):
-    print('Try a menu with', numItems, 'items')
-    items = buildLargeMenu(numItems, 90, 250)
-    testMaxVal(items, 2500, False)
+   print('Try a menu with', numItems, 'items')
+   items = buildLargeMenu(numItems, 90, 250)
+   testMaxVal(items, 750, False)
 
 
 

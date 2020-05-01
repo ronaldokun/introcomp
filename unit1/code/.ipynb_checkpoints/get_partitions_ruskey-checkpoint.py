@@ -95,8 +95,5 @@ def get_partitions_ruskey(L):
     if len(L) > 1:
         yield [[e] for e in L]
 
-
-for partitions in get_partitions_ruskey(['a','b','c','e']):
-    print(partitions, len(partitions))
-
-
+# for partitions in get_partitions_ruskey(['a','b','c','e']):
+#    print(partitions, len(partitions))
